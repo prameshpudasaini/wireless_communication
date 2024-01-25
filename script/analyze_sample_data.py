@@ -9,8 +9,8 @@ pio.renderers.default = 'browser'
 from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 
-os.chdir(r"D:\GitHub\wireless_radios")
-base_dir = "ignore/radio_data_sample"
+os.chdir(r"D:\GitHub\wireless_communication")
+base_dir = "ignore/radio_data_20230913_20231013"
 
 def processData(file_path, file_name):
     # read excel sheet with multi-line header
@@ -50,9 +50,9 @@ def processData(file_path, file_name):
     
     return adf
 
-raw_files = {'Kierland': ['Bell_64th_Gateway', 'Greenway_66thSt'],
-             'Thomas_E_I17': ['Thomas_43rdAve', 'Thomas_75Ave'],
-             'SouthWest': ['LowerBuckeye_83rdAve', 'VanBuren_83rdAve']}
+raw_files = {'Kierland': ['Bell_64th_Gateway', 'Greenway_60thSt', 'Greenway_66thSt'],
+             'Thomas_W_I17': ['Osborn_43Ave', 'Osborn_59thAve', 'Thomas_31Ave', 'Thomas_43rdAve', 'Thomas_59thAve', 'Thomas_75Ave'],
+             'SouthWest': ['Illini_91Ave', 'LowerBuckeye_72Ave_HAWK', 'LowerBuckeye_83rdAve', 'McDowell_83rdAve', 'VanBuren_83rdAve']}
 
 file_data = []
 for folder, files in raw_files.items():
@@ -64,34 +64,49 @@ for folder, files in raw_files.items():
 
 adf = pd.concat(file_data)
 
+# =============================================================================
 # latency analysis
-fig1 = px.line(adf, x = 'date', y = 'Latency_ms', color = 'intersection',
-               labels = {'date': 'Dates in September',
-                         'Latency_ms': 'Latency in millisecond'})
-fig1.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
-fig1.show()
+# =============================================================================
 
+fig_lat_line = px.line(adf, x = 'date', y = 'Latency_ms', color = 'intersection',
+                       labels = {'date': 'Dates in September', 'Latency_ms': 'Latency in millisecond'})
+fig_lat_line.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
+fig_lat_line.show()
+
+fig_lat_box = px.box(adf, x = 'intersection', y = 'Latency_ms',
+                     labels = {'intersection': 'Intersection', 'Latency_ms': 'Latency in millisecond'})
+fig_lat_box.show()
+
+# =============================================================================
 # packet loss analysis
-fig2 = px.line(adf, x = 'date', y = 'Packet_Loss', color = 'intersection',
-               labels = {'date': 'Dates in September',
-                         'Packet_Loss': 'Packet Loss (%)'})
-fig2.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
-fig2.show()
+# =============================================================================
 
-fig = px.line(adf, x = 'date', y = 'value', color = 'intersection', facet_col = 'Metrics', facet_col_wrap = 2)
-fig.update_xaxes(matches = None)
-fig.update_yaxes(matches = None)
-fig.show()
+fig_pac_line = px.line(adf, x = 'date', y = 'Packet_Loss', color = 'intersection', 
+                       labels = {'date': 'Dates in September', 
+                                 'Packet_Loss': 'Packet Loss (%)'})
+fig_pac_line.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
+fig_pac_line.show()
 
+fig_pac_box = px.box(adf, x = 'intersection', y = 'Packet_Loss',
+                     labels = {'intersection': 'Intersection'})
+fig_pac_box.show()
+
+# =============================================================================
 # throughput analysis
+# =============================================================================
+
 tdf = adf[['Up_Mbps', 'Down_Mbps', 'date', 'intersection']].copy(deep = True)
 tdf = pd.melt(tdf, id_vars = ['date', 'intersection'], var_name = 'Throughput_Metrics', value_name = 'value')
 
-fig3 = px.line(tdf, x = 'date', y = 'value', color = 'intersection', facet_col = 'Throughput_Metrics',
-               labels = {'date': 'Dates in September',
-                         'value': 'Speed in Mbps'})
-fig3.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
-fig3.show()
+fig_thru_line = px.line(tdf, x = 'date', y = 'value', color = 'intersection', facet_col = 'Throughput_Metrics', 
+                        labels = {'date': 'Dates in September', 'value': 'Speed in Mbps'})
+fig_thru_line.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
+fig_thru_line.show()
+
+fig_thru_box = px.box(tdf, x = 'intersection', y = 'value', color = 'Throughput_Metrics',
+                      labels = {'intersection': 'Intersection', 'value': 'Speed in Mbps'})
+fig_thru_box.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'left', x = 0.01))
+fig_thru_box.show()
 
 # # compute average of metrics by date
 # adf = df.groupby('date').agg(Up_Mbps = ('Up_Mbps', 'mean'),
