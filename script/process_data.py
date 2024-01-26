@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 from datetime import datetime
+import matplotlib.pyplot as plt
 
 import plotly.express as px
 import plotly.io as pio
@@ -158,7 +159,7 @@ thru_up_heatmap = go.Figure(data = go.Heatmap(
     x = cdf['Time'], 
     y = cdf['Node'], 
     z = cdf['Up_(Mbps)'], 
-    colorscale = 'Viridis'))
+    colorscale = 'Reds'))
 thru_up_heatmap.update_layout(
     title = dict(text = 'Throughput analysis: upload speed (Mbps) in January'),
     yaxis = dict(categoryorder = 'array', categoryarray = list(node_order.values())[0]))
@@ -173,3 +174,109 @@ thru_down_heatmap.update_layout(
     title = dict(text = 'Throughput analysis: download speed (Mbps) in January'),
     yaxis = dict(categoryorder = 'array', categoryarray = list(node_order.values())[0]))
 thru_down_heatmap.show()
+
+# =============================================================================
+# latency analysis
+# =============================================================================
+
+# box plots
+latency_box = px.box(
+    cdf, 
+    x = 'Node', 
+    y = 'Latency_(ms)', 
+    color = 'Area', 
+    category_orders = node_order, 
+    labels = {'Latency_(ms)': 'Latency in millisecond'})
+latency_box.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'right', x = 0.99))
+latency_box.show()
+
+# heatmap
+latency_heatmap = go.Figure(data = go.Heatmap(
+    x = cdf['Time'], 
+    y = cdf['Node'], 
+    z = cdf['Latency_(ms)'], 
+    colorscale = 'Reds'))
+latency_heatmap.update_layout(
+    title = dict(text = 'Latency analysis'),
+    yaxis = dict(categoryorder = 'array', categoryarray = list(node_order.values())[0]))
+latency_heatmap.show()
+
+# =============================================================================
+# packet loss analysis
+# =============================================================================
+
+# box plots
+packet_box = px.box(
+    cdf, 
+    x = 'Node', 
+    y = 'Packet_Loss', 
+    color = 'Area', 
+    category_orders = node_order, 
+    labels = {'Packet_Loss': 'Packet loss'})
+packet_box.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'right', x = 0.6))
+packet_box.show()
+
+# heatmap
+packet_heatmap = go.Figure(data = go.Heatmap(
+    x = cdf['Time'], 
+    y = cdf['Node'], 
+    z = cdf['Packet_Loss'], 
+    colorscale = 'Reds'))
+packet_heatmap.update_layout(
+    title = dict(text = 'Packet loss analysis'),
+    yaxis = dict(categoryorder = 'array', categoryarray = list(node_order.values())[0]))
+packet_heatmap.show()
+
+# =============================================================================
+# received signal strength analysis
+# =============================================================================
+
+# box plots
+rss_box = px.box(
+    cdf, 
+    x = 'Node', 
+    y = 'RPSP', 
+    color = 'Area', 
+    category_orders = node_order, 
+    labels = {'RPSP': 'Received point-to-point signal strength'})
+rss_box.update_layout(legend = dict(yanchor = 'top', y = 0.99, xanchor = 'right', x = 0.99))
+rss_box.show()
+
+# heatmap
+rss_heatmap = go.Figure(data = go.Heatmap(
+    x = cdf['Time'], 
+    y = cdf['Node'], 
+    z = cdf['RPSP'], 
+    colorscale = 'Viridis'))
+rss_heatmap.update_layout(
+    title = dict(text = 'Received signal strength analysis'),
+    yaxis = dict(categoryorder = 'array', categoryarray = list(node_order.values())[0]))
+rss_heatmap.show()
+
+# =============================================================================
+# correlation heatmap
+# =============================================================================
+
+# select columns for correlation analysis
+cor_df = cdf.iloc[:, 1:11].copy(deep = True)
+corr = cor_df.corr()
+
+# plot correlation heatmap
+fig = plt.figure()
+ax = fig.add_subplot(111)
+cax = ax.matshow(corr, cmap = 'coolwarm', vmin = -1, vmax = 1)
+fig.colorbar(cax)
+ticks = np.arange(0, len(cor_df.columns), 1)
+ax.set_xticks(ticks)
+plt.xticks(rotation = 90)
+ax.set_yticks(ticks)
+ax.set_xticklabels(cor_df.columns)
+ax.set_yticklabels(cor_df.columns)
+
+for i in range(len(cor_df.columns)):
+    for j in range(len(cor_df.columns)):
+        text = f"{corr.iloc[i, j]:.2f}"
+        ax.text(j, i, text, ha = 'center', va = 'center', color = 'black', fontsize = 6)
+
+plt.savefig('output/correlation_heatmap_202401.png', dpi = 1200, bbox_inches = 'tight')
+plt.show()
