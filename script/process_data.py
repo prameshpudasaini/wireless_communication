@@ -9,13 +9,13 @@ folders = ["ignore/radio_data_20231226_20240125",
            "ignore/radio_data_20240403_20240503"]
 
 # list of column names
-cols = ['Time', 'Upstream (Mbps)', 'Downstream (Mbps)', 'Latency (ms)',
-       'Packet Loss', '2.4 GHz Noise', '5.8 GHz Noise', '2.4 GHz Airtime - TX',
-       '2.4 GHz Airtime - RX', '2.4 GHz Airtime - Total',
-       '5.8 GHz Airtime - TX', '5.8 GHz Airtime - RX',
-       '5.8 GHz Airtime - Total', 'PSP', 'RPSP', 'Tx Rate (Kbps)',
-       'RxRate (Kbps)', '5.8 GHz Tx Rate (Kbps)', '5.8 GHz Rx Rate (Kbps)',
-       '# 2.4 GHz Routed Clients', '# 5.8 GHz Routed Clients', '# Neighbors',
+cols = ['Time', 'Upload (Mbps)', 'Download (Mbps)', 'Latency (ms)',
+       'Packet Loss', '2.4 GHz Noise', '5.8 GHz Noise', '2.4 GHz Airtime TX',
+       '2.4 GHz Airtime RX', '2.4 GHz Airtime Total',
+       '5.8 GHz Airtime TX', '5.8 GHz Airtime RX',
+       '5.8 GHz Airtime Total', 'PSP', 'RPSP', 'Tx Rate (Kbps)',
+       'Rx Rate (Kbps)', '5.8 GHz Tx Rate (Kbps)', '5.8 GHz Rx Rate (Kbps)',
+       '2.4 GHz Routed Clients', '5.8 GHz Routed Clients', 'Neighbors',
        'Hop Count', '2.4 GHz Channel', '5.8 GHz Channel',
        'Next Hop Upstream Router']
 
@@ -39,15 +39,6 @@ for folder in folders:
         elif file.endswith('.xlsx'):
             data = pd.read_excel(file_path, sheet_name = 'Sheet1', header = None, names = cols, skiprows = 2)
             node = file[:-5]
-            
-        # format column names: remove parentheses and # sign
-        data.columns = [col.replace('(', '').replace(')', '').replace('#', '').replace('-', '') for col in data.columns]
-        
-        # strip whitespace at start/end of column names
-        data.columns = data.columns.str.strip()
-        
-        # strip whitespace from column names and add underscore
-        data.columns = [col.replace('  ', ' ').replace(' ', '_') for col in data.columns]
         
         # add node/intersection name as variable and append data to list
         data['Node'] = node
@@ -66,7 +57,7 @@ df.Time = pd.to_datetime(df.Time, format = '%Y %b %d %H')
 df['Area'] = np.select([df.Node.str.contains('Greenway|Thunderbird'), 
                         df.Node.str.contains('Indian School|Osborn|Thomas'), 
                         df.Node.str.contains('Van Buren|Buckeye')], 
-                       ['Kierland', 'Thomas West of I-17', 'Southwest'])
+                       ['Kierland', 'Thomas', 'Southwest'])
 
 # save file
 output_path = "ignore/radio_data_processed.txt"
