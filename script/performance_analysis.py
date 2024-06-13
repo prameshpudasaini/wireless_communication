@@ -261,3 +261,64 @@ px.box(
     color = 'Peak',
     category_orders = {'Node': order_node, 'Peak': order_peak}
 ).show()
+
+# =============================================================================
+# anomaly detection using Isolation Forest
+# =============================================================================
+
+# drop rows with missing values
+idf = df.copy()
+idf.dropna(inplace = True)
+
+# initialize model
+isolation_forest = IsolationForest(contamination = 0.01, random_state = 42)
+
+# fit model
+isolation_forest.fit(idf[perf_metrics])
+
+# predict anomalies
+idf['anomaly_score'] = isolation_forest.predict(idf[perf_metrics])
+
+# mark anomalies (anomaly score = -1) and normal points (anomaly_score = 1)
+idf['is_anomaly'] = idf['anomaly_score'] == -1
+
+for area in list(idf.Area.unique()):
+    # filter for study area
+    idf_area = idf.copy()[idf.Area == area]
+    
+    # normal points and anomalies
+    normal_points = idf_area[idf_area['is_anomaly'] == False]
+    anomalies = idf_area[idf_area['is_anomaly'] == True]
+
+    # plot normal points and anomalies
+    plt.figure()
+    
+    plt.scatter(
+        normal_points['Upload (Mbps)'],
+        normal_points['Latency (ms)'],
+        c = 'green',
+        label = 'Normal',
+        alpha = 0.7,
+        edgecolors = 'w',
+        s = 30
+    )
+    
+    plt.scatter(
+        anomalies['Upload (Mbps)'],
+        anomalies['Latency (ms)'],
+        c = 'red',
+        label = 'Anomaly',
+        alpha = 0.7,
+        edgecolors = 'w',
+        s = 30
+    )
+    
+    # titles and labels
+    plt.title(f"{area}", fontweight = 'bold')
+    plt.xlabel('Upload (Mbps)')
+    plt.ylabel('Latency (ms)')
+    plt.legend()    
+    
+    output_path = os.path.join("output/anomaly_detection_202401_" + area + '.png')
+    plt.savefig(output_path, dpi = 1200, bbox_inches = 'tight')
+    plt.show()
