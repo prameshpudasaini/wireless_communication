@@ -145,6 +145,11 @@ px.box(
     y = 'Upload (Mbps)',
     color = 'Area',
     category_orders = {'Area': order_area}
+).update_layout(
+    xaxis_title_font = dict(size = 18),
+    yaxis_title_font = dict(size = 18),
+    legend_title_font = dict(size = 18),
+    font = dict(size = 18)
 ).show()
 
 # upload speed by study area and peak
@@ -165,23 +170,34 @@ px.box(
     category_orders = {'Node': order_node, 'Peak': order_peak}
 ).show()
 
-# latency by study area and peak
+# latency by study area
 px.box(
     df,
     x = 'Node',
     y = 'Latency (ms)',
-    color = 'Peak',
-    category_orders = {'Node': order_node, 'Peak': order_peak}
+    color = 'Area',
+    category_orders = {'Area': order_area}
+).update_layout(
+    xaxis_title_font = dict(size = 18),
+    yaxis_title_font = dict(size = 18),
+    legend_title_font = dict(size = 18),
+    font = dict(size = 18)
 ).show()
 
-# packet loss by study area and peak
+# packet loss by study area
 px.box(
     df,
     x = 'Node',
     y = 'Packet Loss',
-    color = 'Peak',
-    category_orders = {'Node': order_node, 'Peak': order_peak}
+    color = 'Area',
+    category_orders = {'Area': order_area}
+).update_layout(
+    xaxis_title_font = dict(size = 18),
+    yaxis_title_font = dict(size = 18),
+    legend_title_font = dict(size = 18),
+    font = dict(size = 18)
 ).show()
+
 
 list_perf_df = [] # store stats of performance metrics in a list
 

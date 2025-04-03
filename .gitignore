@@ -2,3 +2,4 @@ ignore
 .Rproj.user
 .Rhistory
 wireless_communication.Rproj
+.DS_Store
