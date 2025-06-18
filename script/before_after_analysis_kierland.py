@@ -33,6 +33,10 @@ bkdf['DateTime'] = pd.to_datetime(bkdf['DateTime'])
 akdf['DateTime'] = pd.to_datetime(akdf['DateTime'])
 akdf = akdf[akdf.DateTime <= pd.Timestamp('2025-03-18 23:00:00')]
 
+# update packet loss to %
+bkdf['PacketLoss'] = bkdf['PacketLoss'] * 100
+akdf['PacketLoss'] = akdf['PacketLoss'] * 100
+
 # merge before and after datasets
 kdf = pd.concat([bkdf, akdf], ignore_index = True)
 
@@ -72,6 +76,7 @@ def create_heatmap(variable, plot_title):
     zmax = max(bkdf[variable].min(), akdf[variable].max())
     if variable == 'PacketLoss':
         zmin = 0
+        zmax = 100
     else:
         zmin = min(bkdf[variable].min(), akdf[variable].min())
     
